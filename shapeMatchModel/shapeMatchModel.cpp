@@ -104,8 +104,6 @@ int ShapeMatchModelDijkstra::getNumCouplingConstraints() {
 
 Eigen::MatrixXi ShapeMatchModelDijkstra::getSortedMatching(const Eigen::MatrixXi& indicatorVector) {
     const long maxNumEdgesOnLevel = productspace.rows() / EY.rows();
-    Eigen::MatrixXi matchingSorted(indicatorVector.rows(), 4);
-    matchingSorted = -matchingSorted.setOnes();
 
 
     const long numCycleConstr = EY.rows();
@@ -127,12 +125,14 @@ Eigen::MatrixXi ShapeMatchModelDijkstra::getSortedMatching(const Eigen::MatrixXi
     long firstNonZeroIdx = -1;
     long numMatches = 0;
     for (long i = 0; i < indicatorVector.rows(); i++) {
-        if (indicatorVector(i) > 0) {
+        if (indicatorVector(i) == 1) {
+            numMatches++;
             if (firstNonZeroIdx == -1)
                 firstNonZeroIdx = i;
-            numMatches++;
         }
     }
+    Eigen::MatrixXi matchingSorted(numMatches, 4);
+    matchingSorted = -matchingSorted.setOnes();
     Eigen::MatrixXi nodeUsed(numInOutConstr, 1); nodeUsed.setZero();
     //Eigen::MatrixXi sortedIndices(numMatches, 1); sortedIndices = -sortedIndices.setOnes();
 
