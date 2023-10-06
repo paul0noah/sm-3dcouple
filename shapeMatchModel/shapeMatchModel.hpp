@@ -15,6 +15,8 @@
 #include <Eigen/Sparse>
 #include <ctime>
 
+#define DEBUG_SHAPE_MATCH_MODEL true
+
 
 class ShapeMatchModelDijkstra {
 private:
@@ -46,6 +48,7 @@ public:
     Eigen::MatrixXi getRHS();
     Eigen::MatrixXi getProductSpace();
     int getNumCouplingConstraints();
+    Eigen::MatrixXi getSortedMatching(const Eigen::MatrixXi& indicatorVector);
 
 };
 

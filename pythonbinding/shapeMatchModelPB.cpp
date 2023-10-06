@@ -26,4 +26,5 @@ PYBIND11_MODULE(smm_dijkstra, handle) {
     smm.def("getRHS", &ShapeMatchModelDijkstra::getRHS);
     smm.def("getProductSpace", &ShapeMatchModelDijkstra::getProductSpace);
     smm.def("getNumCouplingConstraints", &ShapeMatchModelDijkstra::getNumCouplingConstraints);
+    smm.def("getSortedMatching", &ShapeMatchModelDijkstra::getSortedMatching);
 }

@@ -13,7 +13,7 @@
 #include "shapeMatchModel/combinations/combinations.hpp"
 #include "helper/utils.hpp"
 
-#define DEBUG_CONSTRAINTS true
+#define DEBUG_CONSTRAINTS false
 
 
 class Constraints {
