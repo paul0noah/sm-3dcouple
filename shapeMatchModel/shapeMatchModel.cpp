@@ -28,12 +28,16 @@ void ShapeMatchModelDijkstra::generate() {
     std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
     if (verbose) std::cout << "[ShapeMM]   Done (" << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << "  [ms])" << std::endl;
     if (verbose) std::cout << "[ShapeMM]   > Constraints" << std::endl;
-    Constraints constr(EX, EY, productspace, piEy, couplingConstraints);
+    Constraints constr(EX, EY, productspace, piEy, couplingConstraints, otherSelfIntersections);
     const auto constrVectors = constr.getConstraints();
     AI  = std::get<0>(constrVectors);
     AJ  = std::get<1>(constrVectors);
     AV  = std::get<2>(constrVectors);
     RHS = std::get<3>(constrVectors);
+    AIleq  = std::get<4>(constrVectors);
+    AJleq  = std::get<5>(constrVectors);
+    AVleq  = std::get<6>(constrVectors);
+    RHSleq = std::get<7>(constrVectors);
     numCouplingConstraints = constr.getNumCouplingConstr();
     
     std::chrono::steady_clock::time_point t3 = std::chrono::steady_clock::now();
@@ -51,7 +55,7 @@ void ShapeMatchModelDijkstra::generate() {
 
 
 
-ShapeMatchModelDijkstra::ShapeMatchModelDijkstra(Eigen::MatrixXd& iVX, Eigen::MatrixXi& iEX, Eigen::MatrixXd& iVY, Eigen::MatrixXi& iEY, Eigen::MatrixXd& iFeatDiffMatrix, bool iCouplingConstraints, bool iLineIntegral) {
+ShapeMatchModelDijkstra::ShapeMatchModelDijkstra(Eigen::MatrixXd& iVX, Eigen::MatrixXi& iEX, Eigen::MatrixXd& iVY, Eigen::MatrixXi& iEY, Eigen::MatrixXd& iFeatDiffMatrix, bool iCouplingConstraints, bool iOtherSelfIntersections, bool iLineIntegral) {
     VX = iVX;
     EX = iEX;
     VY = iVY;
@@ -61,6 +65,7 @@ ShapeMatchModelDijkstra::ShapeMatchModelDijkstra(Eigen::MatrixXd& iVX, Eigen::Ma
     verbose = true;
     numCouplingConstraints = 0;
     couplingConstraints = iCouplingConstraints;
+    otherSelfIntersections = iOtherSelfIntersections;
     lineIntegral = iLineIntegral;
 }
 
@@ -89,6 +94,20 @@ Eigen::MatrixXi ShapeMatchModelDijkstra::getRHS() {
         generate();
     }
     return RHS;
+}
+
+std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> ShapeMatchModelDijkstra::getAleqVectors() {
+    if (!modelGenerated) {
+        generate();
+    }
+    return std::make_tuple(AIleq, AJleq, AVleq);
+}
+
+Eigen::MatrixXi ShapeMatchModelDijkstra::getRHSleq() {
+    if (!modelGenerated) {
+        generate();
+    }
+    return RHSleq;
 }
 
 Eigen::MatrixXi ShapeMatchModelDijkstra::getProductSpace() {

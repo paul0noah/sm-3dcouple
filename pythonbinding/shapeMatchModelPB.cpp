@@ -19,11 +19,13 @@ PYBIND11_MODULE(smm_dijkstra, handle) {
 
     py::class_<ShapeMatchModelDijkstra, std::shared_ptr<ShapeMatchModelDijkstra>> smm(handle, "ShapeMatchModelDijkstra");
 
-    smm.def(py::init<Eigen::MatrixXd&, Eigen::MatrixXi&, Eigen::MatrixXd&, Eigen::MatrixXi&, Eigen::MatrixXd&, bool, bool>());
+    smm.def(py::init<Eigen::MatrixXd&, Eigen::MatrixXi&, Eigen::MatrixXd&, Eigen::MatrixXi&, Eigen::MatrixXd&, bool, bool, bool>());
     smm.def("generate", &ShapeMatchModelDijkstra::generate);
     smm.def("getCostVector", &ShapeMatchModelDijkstra::getCostVector);
     smm.def("getAVectors", &ShapeMatchModelDijkstra::getAVectors);
     smm.def("getRHS", &ShapeMatchModelDijkstra::getRHS);
+    smm.def("getAleqVectors", &ShapeMatchModelDijkstra::getAleqVectors);
+    smm.def("getRHSleq", &ShapeMatchModelDijkstra::getRHSleq);
     smm.def("getProductSpace", &ShapeMatchModelDijkstra::getProductSpace);
     smm.def("getNumCouplingConstraints", &ShapeMatchModelDijkstra::getNumCouplingConstraints);
     smm.def("getSortedMatching", &ShapeMatchModelDijkstra::getSortedMatching);

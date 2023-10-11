@@ -13,7 +13,7 @@
 #include "shapeMatchModel/combinations/combinations.hpp"
 #include "helper/utils.hpp"
 
-#define DEBUG_CONSTRAINTS false
+#define DEBUG_CONSTRAINTS true
 
 
 class Constraints {
@@ -23,12 +23,13 @@ private:
     Eigen::MatrixXi& productspace;
     Eigen::MatrixXi& piEy;
     bool coupling;
+    bool allowOtherSelfIntersections;
     long nVX;
     int numCouplingConstraints;
     
 public:
-    Constraints(Eigen::MatrixXi& EX, Eigen::MatrixXi& EY, Eigen::MatrixXi& productspace, Eigen::MatrixXi& piEy, bool coupling);
-    std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> getConstraints();
+    Constraints(Eigen::MatrixXi& EX, Eigen::MatrixXi& EY, Eigen::MatrixXi& productspace, Eigen::MatrixXi& piEy, bool coupling, bool allowOtherSelfIntersections);
+    std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> getConstraints();
     int getNumCouplingConstr();
 };
 #endif /* constraints_hpp */

@@ -1,15 +1,15 @@
 #include "constraints.hpp"
 #include <vector>
 
-Constraints::Constraints(Eigen::MatrixXi& EX, Eigen::MatrixXi& EY, Eigen::MatrixXi& productspace, Eigen::MatrixXi& piEy, bool coupling) :
-    EX(EX), EY(EY), productspace(productspace), coupling(coupling), piEy(piEy) {
+Constraints::Constraints(Eigen::MatrixXi& EX, Eigen::MatrixXi& EY, Eigen::MatrixXi& productspace, Eigen::MatrixXi& piEy, bool coupling, bool allowOtherSelfIntersections) :
+    EX(EX), EY(EY), productspace(productspace), coupling(coupling), allowOtherSelfIntersections(allowOtherSelfIntersections), piEy(piEy) {
 
     nVX = EX.maxCoeff()+1;
     numCouplingConstraints = 0;
 }
 
 
-std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> Constraints::getConstraints() {
+std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> Constraints::getConstraints() {
     const long nVY = EY.rows();
     Eigen::MatrixXi EY2Idx(EY.maxCoeff(), 1);
     EY2Idx = -EY2Idx.setOnes();
@@ -18,12 +18,13 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> C
     }
     const long nEX = EX.rows();
     long nnzConstraints = nVY * (nEX + nVX) + 2 * nVY * (2 * nEX + 2 * nVX);
+    long nnzLeqConstraints = 0;
     long numRowsConstraints = nVY + nVY * nVX;
     Eigen::ArrayXi VYcount;
     std::vector<std::vector<int>> couplingLayers;
     int numLayerCouples = 0;
+    const long numVY = EY.maxCoeff() + 1;
     if (coupling) {
-        const long numVY = EY.maxCoeff() + 1;
         for (int i = 0; i < numVY; i++) {
             couplingLayers.push_back(std::vector<int>());
         }
@@ -54,12 +55,20 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> C
         }
     }
 
+    if (!allowOtherSelfIntersections) {
+        nnzLeqConstraints = (nVY - numLayerCouples) * (2 * nEX + nVX);
+    }
+
     Eigen::MatrixXi I(nnzConstraints, 1); I.setZero();
     Eigen::MatrixXi J(nnzConstraints, 1); J.setZero();
     Eigen::MatrixXi V(nnzConstraints, 1); V.setZero();
+    Eigen::MatrixXi Ileq(nnzLeqConstraints, 1); Ileq.setZero();
+    Eigen::MatrixXi Jleq(nnzLeqConstraints, 1); Jleq.setZero();
+    Eigen::MatrixXi Vleq(nnzLeqConstraints, 1); Vleq.setZero();
     long idx = 0;
 
     Eigen::MatrixXi RHS(numRowsConstraints, 1);
+    Eigen::MatrixXi RHSleq(nVX, 1);
     RHS.setZero();
 
     long offset = 0;
@@ -156,9 +165,18 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> C
     if (coupling) {
         const long numEdgesOnLayer = (2 * nEX + nVX);
         int nthCoupling = 0;
-        for (long i = 0; i < nVY; i++) {
+        for (long i = 0; i < EY.maxCoeff()+1; i++) {
             if (VYcount(i, 0) > 1) {
                 int baseCoupleLayer = -1;
+                try {
+                    auto& iiiii = couplingLayers.at(i);
+                }
+                catch (const std::exception &exc) {
+                    std::cout << " i = " << i << std::endl;
+                    std::cout << " couplingLayers.size() = " << couplingLayers.size() << std::endl;
+                    std::cout << exc.what() << std::endl;
+                }
+
                 for (auto& layer : couplingLayers.at(i)) {
                     if (baseCoupleLayer == -1) {
                         baseCoupleLayer = layer;
@@ -198,10 +216,58 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> C
 
     }
 
+    if (!allowOtherSelfIntersections) {
+        long numAddedLeq = 0;
+        RHSleq.setOnes();
+
+        for (long i = 0; i < productspace.rows(); i++) {
+            // if degenerate 3d edge we do not add this to the constraint since we can "stay in the 3d vertex for multiple consecutive layers"
+            if (productspace(i, 3) == productspace(i, 2)) {
+                continue;
+            }
+
+            //const long inNodeIdx = piEy(i, 0) * nVX + productspace(i, 2); // we go into this node
+
+            const long outNodeIdx = productspace(i, 3);//piEy(i, 1) * nVX + productspace(i, 3); // we leave this node
+
+
+            /*/ in
+            if (VYcount(productspace(i, 0), 0)  <= 1) {
+                Ileq(numAddedLeq, 0) = (int) (inNodeIdx);
+                Jleq(numAddedLeq, 0) = (int) i;
+                Vleq(numAddedLeq, 0) = 1;
+                numAddedLeq++;
+
+                if (numAddedLeq >= nnzLeqConstraints) {
+                    std::cout << "[CONSTR] numAddedLeq >= nnzLeqConstraints " << numAddedLeq << " " << nnzLeqConstraints << std::endl;
+                    break;
+                }
+            }*/
+
+            // out
+            if (VYcount(productspace(i, 1), 0) <= 1) {
+                Ileq(numAddedLeq, 0) = (int) outNodeIdx;//(outNodeIdx + nVY * nVX);
+                Jleq(numAddedLeq, 0) = (int) i;
+                Vleq(numAddedLeq, 0) = 1;
+                numAddedLeq++;
+
+                if (numAddedLeq > nnzLeqConstraints) {
+                    std::cout << "[CONSTR] numAddedLeq > nnzLeqConstraints " << numAddedLeq << " " << nnzLeqConstraints << std::endl;
+                    break;
+                }
+            }
+
+
+        }
+        Ileq.conservativeResize(numAddedLeq, 1);
+        Jleq.conservativeResize(numAddedLeq, 1);
+        Vleq.conservativeResize(numAddedLeq, 1);
+    }
+
     I.conservativeResize(idx, 1);
     J.conservativeResize(idx, 1);
     V.conservativeResize(idx, 1);
-    return std::make_tuple(I, J, V, RHS);
+    return std::make_tuple(I, J, V, RHS, Ileq, Jleq, Vleq, RHSleq);
 }
 
 

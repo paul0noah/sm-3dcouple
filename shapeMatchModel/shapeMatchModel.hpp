@@ -31,21 +31,30 @@ private:
     Eigen::MatrixXi AJ;
     Eigen::MatrixXi AV;
     Eigen::MatrixXi RHS;
+
+    Eigen::MatrixXi AIleq;
+    Eigen::MatrixXi AJleq;
+    Eigen::MatrixXi AVleq;
+    Eigen::MatrixXi RHSleq;
+
     Eigen::MatrixXi productspace;
     Eigen::MatrixXd energy;
     bool modelGenerated;
     int numCouplingConstraints;
     bool couplingConstraints;
     bool lineIntegral;
+    bool otherSelfIntersections;
     
 public:
-    ShapeMatchModelDijkstra(Eigen::MatrixXd& iVX, Eigen::MatrixXi& iFX, Eigen::MatrixXd& iVY, Eigen::MatrixXi& iEY, Eigen::MatrixXd& iFeatDiffMatrix, bool iCouplingConstraints, bool iLineIntegral);
+    ShapeMatchModelDijkstra(Eigen::MatrixXd& iVX, Eigen::MatrixXi& iFX, Eigen::MatrixXd& iVY, Eigen::MatrixXi& iEY, Eigen::MatrixXd& iFeatDiffMatrix, bool iCouplingConstraints, bool iOtherSelfIntersections, bool iLineIntegral);
     ~ShapeMatchModelDijkstra();
     void generate();
 
     Eigen::MatrixXd getCostVector();
     std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> getAVectors();
+    std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> getAleqVectors();
     Eigen::MatrixXi getRHS();
+    Eigen::MatrixXi getRHSleq();
     Eigen::MatrixXi getProductSpace();
     int getNumCouplingConstraints();
     Eigen::MatrixXi getSortedMatching(const Eigen::MatrixXi& indicatorVector);
