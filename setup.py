@@ -21,6 +21,12 @@ class CMakeBuild(build_ext):
 
     def run(self):
         try:
+            out = subprocess.check_output(['git', 'submodule', 'update', '--init', '--recursive'])
+            if self.verbose:
+                print(out)
+        except OSError:
+            raise RuntimeError("Cannot update submodules")
+        try:
             out = subprocess.check_output(['cmake', '--version'])
             if self.verbose:
                 print(out)
