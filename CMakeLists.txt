@@ -38,6 +38,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/external/robin-map/include)
 
 # Add your project files
+add_subdirectory(external/BDD)
+target_include_directories(${PROJECT_NAME} PUBLIC external/BDD/include/)
 add_subdirectory(helper)
 add_subdirectory(shapeMatchModel)
 if( NOT BUILD_MEX_FILE )

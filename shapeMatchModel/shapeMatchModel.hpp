@@ -14,6 +14,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <ctime>
+#include <ILP_input.h>
 
 #define DEBUG_SHAPE_MATCH_MODEL true
 
@@ -58,6 +59,7 @@ public:
     Eigen::MatrixXi getProductSpace();
     int getNumCouplingConstraints();
     Eigen::MatrixXi getSortedMatching(const Eigen::MatrixXi& indicatorVector);
+    LPMP::ILP_input getIlpObj();
 
 };
 

@@ -1,3 +1,6 @@
 [submodule "external/robin-map"]
 	path = external/robin-map
 	url = https://github.com/Tessil/robin-map.git
+[submodule "external/BDD"]
+	path = external/BDD
+	url = https://github.com/LPMP/BDD.git

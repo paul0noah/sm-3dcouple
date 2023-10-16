@@ -29,4 +29,8 @@ PYBIND11_MODULE(smm_dijkstra, handle) {
     smm.def("getProductSpace", &ShapeMatchModelDijkstra::getProductSpace);
     smm.def("getNumCouplingConstraints", &ShapeMatchModelDijkstra::getNumCouplingConstraints);
     smm.def("getSortedMatching", &ShapeMatchModelDijkstra::getSortedMatching);
+    smm.def("getIlpObj", &ShapeMatchModelDijkstra::getIlpObj);
+
+    py::class_<LPMP::ILP_input>(handle, "ILP_instance")
+            .def(py::init<>());
 }
