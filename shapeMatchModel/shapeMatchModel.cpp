@@ -175,6 +175,13 @@ Eigen::MatrixXi ShapeMatchModelDijkstra::getSortedMatching(const Eigen::MatrixXi
         }
         if (!newNodeFound) {
             if (DEBUG_SHAPE_MATCH_MODEL) std::cout << "[ShapeMM] Did not find new node, aborting" << std::endl;
+            long numadded = 0;
+            for (long ii = 0; ii < indicatorVector.rows(); ii++) {
+                if (indicatorVector(ii) == 1) {
+                    matchingSorted.row(numadded) = productspace.row(ii);
+                    numadded++;
+                }
+            }
             break;
         }
 
