@@ -14,13 +14,13 @@ LPMP::ILP_input ShapeMatchModelDijkstra::getIlpObj() {
     // build constraint matrices
     const std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> Avecs = getAVectors();
     const Eigen::MatrixXi AI = std::get<0>(Avecs);
-    const Eigen::MatrixXi AJ = std::get<0>(Avecs);
-    const Eigen::MatrixXi AV = std::get<0>(Avecs);
+    const Eigen::MatrixXi AJ = std::get<1>(Avecs);
+    const Eigen::MatrixXi AV = std::get<2>(Avecs);
 
     const std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> Avecsleq = getAleqVectors();
     const Eigen::MatrixXi AleqI = std::get<0>(Avecsleq);
-    const Eigen::MatrixXi AleqJ = std::get<0>(Avecsleq);
-    const Eigen::MatrixXi AleqV = std::get<0>(Avecsleq);
+    const Eigen::MatrixXi AleqJ = std::get<1>(Avecsleq);
+    const Eigen::MatrixXi AleqV = std::get<2>(Avecsleq);
 
     const Eigen::MatrixXi rhs = getRHS();
     const Eigen::MatrixXi rhsleq = getRHSleq();
@@ -41,7 +41,7 @@ LPMP::ILP_input ShapeMatchModelDijkstra::getIlpObj() {
 
 
     // Add variables to ilp
-    for (int i = 0; i < objective.rows(); i++) {
+    for (long i = 0; i < objective.rows(); i++) {
         std::string varName = "x" + std::to_string(i);
         ilp.add_new_variable(varName);
         ilp.add_to_objective((double) objective(i), i);
@@ -55,9 +55,9 @@ LPMP::ILP_input ShapeMatchModelDijkstra::getIlpObj() {
         inequalityType       => in our case always "="
     */
     long numadded = 0;
-    for (int k = 0; k < A.outerSize(); ++k) {
+    for (long k = 0; k < A.outerSize(); ++k) {
         ilp.begin_new_inequality();
-        const std::string identifier = "R" + std::to_string(numadded) + " ";
+        const std::string identifier = "R" + std::to_string(numadded);
         ilp.set_inequality_identifier(identifier);
         ilp.set_inequality_type(LPMP::ILP_input::inequality_type::equal);
         for (typename Eigen::SparseMatrix<int, Eigen::RowMajor>::InnerIterator it(A, k); it; ++it) {
@@ -66,11 +66,12 @@ LPMP::ILP_input ShapeMatchModelDijkstra::getIlpObj() {
         ilp.set_right_hand_side(rhs(k, 0));
         numadded++;
     }
-    for (int k = 0; k < Aleq.outerSize(); ++k) {
+
+    for (long k = 0; k < Aleq.outerSize(); ++k) {
         ilp.begin_new_inequality();
-        const std::string identifier = "R" + std::to_string(numadded) + " ";
+        const std::string identifier = "R" + std::to_string(numadded);
         ilp.set_inequality_identifier(identifier);
-        ilp.set_inequality_type(LPMP::ILP_input::inequality_type::equal);
+        ilp.set_inequality_type(LPMP::ILP_input::inequality_type::smaller_equal);
         for (typename Eigen::SparseMatrix<int, Eigen::RowMajor>::InnerIterator it(Aleq, k); it; ++it) {
                 ilp.add_to_constraint(it.value(), it.index());
         }
