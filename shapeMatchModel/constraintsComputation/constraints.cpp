@@ -1,8 +1,9 @@
 #include "constraints.hpp"
 #include <vector>
+#include <set>
 
-Constraints::Constraints(Eigen::MatrixXi& EX, Eigen::MatrixXi& EY, Eigen::MatrixXi& productspace, Eigen::MatrixXi& piEy, bool coupling, bool allowOtherSelfIntersections) :
-    EX(EX), EY(EY), productspace(productspace), coupling(coupling), allowOtherSelfIntersections(allowOtherSelfIntersections), piEy(piEy) {
+Constraints::Constraints(Eigen::MatrixXi& EX, Eigen::MatrixXi& EY, Eigen::MatrixXi& productspace, const int numContours, Eigen::MatrixXi& piEy, bool coupling, bool allowOtherSelfIntersections) :
+    EX(EX), EY(EY), productspace(productspace), coupling(coupling), allowOtherSelfIntersections(allowOtherSelfIntersections), piEy(piEy), numContours(numContours) {
 
     nVX = EX.maxCoeff()+1;
     numCouplingConstraints = 0;
@@ -11,9 +12,11 @@ Constraints::Constraints(Eigen::MatrixXi& EX, Eigen::MatrixXi& EY, Eigen::Matrix
 
 std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> Constraints::getConstraints() {
     const long nVY = EY.rows();
-    Eigen::MatrixXi EY2Idx(EY.maxCoeff(), 1);
+    Eigen::MatrixXi EY2Idx(EY.maxCoeff()+1, 1);
     EY2Idx = -EY2Idx.setOnes();
     for (int i = 0; i < nVY; i++) {
+        if (EY(i, 0) == -1)
+            continue;
         EY2Idx(EY(i, 0), 0) = i;
     }
     const long nEX = EX.rows();
@@ -32,6 +35,9 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
         VYcount = Eigen::ArrayXi(numVY, 1);
         VYcount.setZero();
         for (int i = 0; i < EY.rows(); i++) {
+            if (EY(i, 0) == -1) {
+                continue;
+            }
             VYcount(EY(i, 0), 0) = VYcount(EY(i, 0), 0) + 1;
             couplingLayers[EY(i, 0)].push_back(i);
         }
@@ -73,7 +79,12 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
 
     long offset = 0;
     // projection on inter layer edges for each layer has to be == 1 (for cycle)
+    std::set<int> zerorows;
     for (long i = 0; i < productspace.rows(); i++) {
+        if (productspace(i, 0) == -1) {
+            zerorows.insert(piEy(i));
+            continue;
+        }
         const bool interLayerEdge = productspace(i, 0) != productspace(i, 1);
         if (interLayerEdge) {
             const int rowIdx = piEy(i);//;EY2Idx(productspace(i, 0), 0);
@@ -98,6 +109,9 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
     for (long i = 0; i < offset + 1; i++) {
         RHS(i, 0) = 1;
     }
+    for (const int &row : zerorows) {
+        RHS(row, 0) = 0; // we have to set the weird rows to zero not one otherwise the model is infeasible
+    }
     // the rest of RHS is zero i guess
 
 
@@ -105,6 +119,9 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
     // in and out of each node has to be 0 constraint
     Eigen::MatrixXi debugCounter(numRowsConstraints, 1);
     for (long i = 0; i < productspace.rows(); i++) {
+        if (productspace(i, 0) == -1) {
+            continue;
+        }
         //const long inNodeIdx = EY2Idx(productspace(i, 1), 0) * nVX + productspace(i, 3); // we go into this node
         const long inNodeIdx = piEy(i, 0) * nVX + productspace(i, 2); // we go into this node
         if (DEBUG_CONSTRAINTS && EY2Idx(productspace(i, 1), 0) < 0) {
@@ -165,7 +182,12 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
     if (coupling) {
         const long numEdgesOnLayer = (2 * nEX + nVX);
         int nthCoupling = 0;
+        int nthcontour = 0;
         for (long i = 0; i < EY.maxCoeff()+1; i++) {
+            if (EY(i, 0) == -1) {
+                nthcontour++;
+                continue;
+            }
             if (VYcount(i, 0) > 1) {
                 int baseCoupleLayer = -1;
                 try {
@@ -186,7 +208,7 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
 
                     // any outgoing edge of vertex in X in layer i must be matched by any outgoing edge in baseCoupleLayer
                     const long edgeOffsetBase = baseCoupleLayer * numEdgesOnLayer;
-                    const long edgeOffsetCouple = layer * numEdgesOnLayer;
+                    const long edgeOffsetCouple = (layer - nthcontour) * numEdgesOnLayer;
                     for (long j = 0; j < numEdgesOnLayer; j++) {
                         const long rowIdx = nthCoupling * nVX + productspace(j, 2); // actually only on 0-th layer but should be fine
 
@@ -223,6 +245,9 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
         for (long i = 0; i < productspace.rows(); i++) {
             // if degenerate 3d edge we do not add this to the constraint since we can "stay in the 3d vertex for multiple consecutive layers"
             if (productspace(i, 3) == productspace(i, 2)) {
+                continue;
+            }
+            if (productspace(i, 0) == -1) {
                 continue;
             }
 

@@ -23,12 +23,12 @@ void ShapeMatchModelDijkstra::generate() {
     if (verbose) std::cout << "[ShapeMM]   > Product Space" << std::endl;
     Combinations combos(EX, EY);
     productspace = combos.getProductSpace();
-    Eigen::MatrixXi piEy = combos.getPiEy();
+    piEy = combos.getPiEy();
     
     std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
     if (verbose) std::cout << "[ShapeMM]   Done (" << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << "  [ms])" << std::endl;
     if (verbose) std::cout << "[ShapeMM]   > Constraints" << std::endl;
-    Constraints constr(EX, EY, productspace, piEy, couplingConstraints, otherSelfIntersections);
+    Constraints constr(EX, EY, productspace, combos.getNumContours(), piEy, couplingConstraints, otherSelfIntersections);
     const auto constrVectors = constr.getConstraints();
     AI  = std::get<0>(constrVectors);
     AJ  = std::get<1>(constrVectors);

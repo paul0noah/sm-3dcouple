@@ -39,6 +39,7 @@ private:
     Eigen::MatrixXi RHSleq;
 
     Eigen::MatrixXi productspace;
+    Eigen::MatrixXi piEy;
     Eigen::MatrixXd energy;
     bool modelGenerated;
     int numCouplingConstraints;

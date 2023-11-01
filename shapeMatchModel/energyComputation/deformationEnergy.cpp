@@ -19,6 +19,12 @@ void DeformationEnergy::computeEnergy() {
         const long idx3d0 = productspace(i, 2);
         const long idx3d1 = productspace(i, 3);
 
+        if (idx2d0 == -1) {
+            // handle weird inbetween elements
+            defEnergy(i, 0) = 999999999.9;
+            continue;
+        }
+
         if (DEBUG_DEFORMATION_ENERGY && idx2d0 >= VY.rows()) {
             std::cout << "idx2d0 >= VY.rows()" << idx2d0 << " " <<  VY.rows() << std::endl;
             continue;

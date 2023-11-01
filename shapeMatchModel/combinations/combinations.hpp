@@ -10,6 +10,7 @@
 
 #include <Eigen/Dense>
 #include "helper/shape.hpp"
+#define DEBUG_COMBINATIONS true
 
 class Combinations {
 private:
@@ -18,6 +19,7 @@ private:
     Eigen::MatrixXi& EY;
     Eigen::MatrixXi productspace;
     Eigen::MatrixXi piEY;
+    int numContours;
 
 public:
     void init();
@@ -26,6 +28,7 @@ public:
     void computeCombinations();
     Eigen::MatrixXi getProductSpace();
     Eigen::MatrixXi getPiEy();
+    int getNumContours() const;
 };
 
 #endif /* combinations_hpp */

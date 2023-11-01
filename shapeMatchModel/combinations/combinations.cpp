@@ -21,7 +21,17 @@ void Combinations::computeCombinations() {
 
     const long nEy = EY.rows();
     long numadded = 0;
+    int currentstartidx = 0;
     for (int i = 0; i < nEy; i++) {
+        if (EY(i, 0) == -1) {
+            productspace.row(numadded) << -1, -1, -1, -1;
+            piEY(numadded, 0) = i;
+            piEY(numadded, 1) = i;
+            numContours++;
+            currentstartidx = i+1;
+            numadded++;
+            continue;
+        }
         for (int j = 0; j < EX.rows(); j++) {
 
             // intralayer
@@ -33,7 +43,17 @@ void Combinations::computeCombinations() {
             // interlayer
             productspace.row(numadded) << EY(i, 0), EY(i, 1), EX(j, 0), EX(j, 1);
             piEY(numadded, 0) = i;
-            piEY(numadded, 1) = (i+1) % nEy;
+            if (i+1 < nEy) {
+                if (EY(i+1, 0) == -1) {
+                    piEY(numadded, 1) = currentstartidx;
+                }
+                else {
+                    piEY(numadded, 1) = i+1;
+                }
+            }
+            else {
+                piEY(numadded, 1) = currentstartidx;
+            }
             numadded++;
 
         }
@@ -42,17 +62,30 @@ void Combinations::computeCombinations() {
             // interlayer
             productspace.row(numadded) << EY(i, 0), EY(i, 1), j, j;
             piEY(numadded, 0) = i;
-            piEY(numadded, 1) = (i+1) % nEy;
+            if (i+1 < nEy) {
+                if (EY(i+1, 0) == -1) {
+                    piEY(numadded, 1) = currentstartidx;
+                }
+                else {
+                    piEY(numadded, 1) = i+1;
+                }
+            }
+            else {
+                piEY(numadded, 1) = currentstartidx;
+            }
             numadded++;
         }
 
     }
+    if (DEBUG_COMBINATIONS) std::cout << "[COMBOS] Detected " << numContours << " closed contours" << std::endl;
+    productspace.conservativeResize(numadded, 4);
     combosComputed = true;
 }
 
 
 Combinations::Combinations(Eigen::MatrixXi& EX, Eigen::MatrixXi& EY) : EX(EX), EY(EY) {
     combosComputed = false;
+    numContours = 1;
 }
 
 
@@ -69,4 +102,8 @@ Eigen::MatrixXi Combinations::getPiEy() {
         computeCombinations();
     }
     return piEY;
+}
+
+int Combinations::getNumContours() const {
+    return numContours;
 }

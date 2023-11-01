@@ -26,9 +26,10 @@ private:
     bool allowOtherSelfIntersections;
     long nVX;
     int numCouplingConstraints;
-    
+    int numContours;
+
 public:
-    Constraints(Eigen::MatrixXi& EX, Eigen::MatrixXi& EY, Eigen::MatrixXi& productspace, Eigen::MatrixXi& piEy, bool coupling, bool allowOtherSelfIntersections);
+    Constraints(Eigen::MatrixXi& EX, Eigen::MatrixXi& EY, Eigen::MatrixXi& productspace, const int numContours, Eigen::MatrixXi& piEy, bool coupling, bool allowOtherSelfIntersections);
     std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi> getConstraints();
     int getNumCouplingConstr();
 };
