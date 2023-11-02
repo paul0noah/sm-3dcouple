@@ -182,12 +182,7 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
     if (coupling) {
         const long numEdgesOnLayer = (2 * nEX + nVX);
         int nthCoupling = 0;
-        int nthcontour = 0;
         for (long i = 0; i < EY.maxCoeff()+1; i++) {
-            if (EY(i, 0) == -1) {
-                nthcontour++;
-                continue;
-            }
             if (VYcount(i, 0) > 1) {
                 int baseCoupleLayer = -1;
                 try {
@@ -204,11 +199,20 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
                         baseCoupleLayer = layer;
                         continue;
                     }
+                    int nthcontour = 0;
+                    for (int i = 0; i < layer; i++) {
+                        if (EY(i, 0) == -1) {
+                            nthcontour++;
+                        }
+                    }
 
 
                     // any outgoing edge of vertex in X in layer i must be matched by any outgoing edge in baseCoupleLayer
                     const long edgeOffsetBase = baseCoupleLayer * numEdgesOnLayer;
                     const long edgeOffsetCouple = (layer - nthcontour) * numEdgesOnLayer;
+                    if (edgeOffsetCouple > productspace.rows() - numEdgesOnLayer) {
+                        std::cout << " nthcontour" << nthcontour << std::endl;
+                    }
                     for (long j = 0; j < numEdgesOnLayer; j++) {
                         const long rowIdx = nthCoupling * nVX + productspace(j, 2); // actually only on 0-th layer but should be fine
 
