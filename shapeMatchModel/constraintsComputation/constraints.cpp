@@ -27,21 +27,22 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
     std::vector<std::vector<int>> couplingLayers;
     int numLayerCouples = 0;
     const long numVY = EY.maxCoeff() + 1;
-    if (coupling) {
-        for (int i = 0; i < numVY; i++) {
-            couplingLayers.push_back(std::vector<int>());
-        }
-        // find double or triple vertices
-        VYcount = Eigen::ArrayXi(numVY, 1);
-        VYcount.setZero();
-        for (int i = 0; i < EY.rows(); i++) {
-            if (EY(i, 0) == -1) {
-                continue;
-            }
-            VYcount(EY(i, 0), 0) = VYcount(EY(i, 0), 0) + 1;
-            couplingLayers[EY(i, 0)].push_back(i);
-        }
 
+    for (int i = 0; i < numVY; i++) {
+        couplingLayers.push_back(std::vector<int>());
+    }
+    // find double or triple vertices
+    VYcount = Eigen::ArrayXi(numVY, 1);
+    VYcount.setZero();
+    for (int i = 0; i < EY.rows(); i++) {
+        if (EY(i, 0) == -1) {
+            continue;
+        }
+        VYcount(EY(i, 0), 0) = VYcount(EY(i, 0), 0) + 1;
+        couplingLayers[EY(i, 0)].push_back(i);
+    }
+    
+    if (coupling) {
         for (int i = 0; i < numVY; i++) {
             if (VYcount(i, 0) > 1) {
                 numLayerCouples += VYcount(i, 0) - 1;
@@ -117,7 +118,6 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
 
     const long offset2 = offset + 1;
     // in and out of each node has to be 0 constraint
-    Eigen::MatrixXi debugCounter(numRowsConstraints, 1);
     for (long i = 0; i < productspace.rows(); i++) {
         if (productspace(i, 0) == -1) {
             continue;
