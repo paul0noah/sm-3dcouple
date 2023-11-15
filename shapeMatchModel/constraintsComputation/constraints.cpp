@@ -34,15 +34,14 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
     // find double or triple vertices
     VYcount = Eigen::ArrayXi(numVY, 1);
     VYcount.setZero();
-    for (int i = 0; i < EY.rows(); i++) {
-        if (EY(i, 0) == -1) {
-            continue;
-        }
-        VYcount(EY(i, 0), 0) = VYcount(EY(i, 0), 0) + 1;
-        couplingLayers[EY(i, 0)].push_back(i);
-    }
-    
     if (coupling) {
+        for (int i = 0; i < EY.rows(); i++) {
+            if (EY(i, 0) == -1) {
+                continue;
+            }
+            VYcount(EY(i, 0), 0) = VYcount(EY(i, 0), 0) + 1;
+            couplingLayers[EY(i, 0)].push_back(i);
+        }
         for (int i = 0; i < numVY; i++) {
             if (VYcount(i, 0) > 1) {
                 numLayerCouples += VYcount(i, 0) - 1;
