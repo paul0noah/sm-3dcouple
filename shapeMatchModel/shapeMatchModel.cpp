@@ -24,7 +24,8 @@ void ShapeMatchModelDijkstra::generate() {
     Combinations combos(EX, EY);
     productspace = combos.getProductSpace();
     piEy = combos.getPiEy();
-    
+    numContours = combos.getNumContours();
+
     std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
     if (verbose) std::cout << "[ShapeMM]   Done (" << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << "  [ms])" << std::endl;
     if (verbose) std::cout << "[ShapeMM]   > Constraints" << std::endl;
@@ -67,6 +68,7 @@ ShapeMatchModelDijkstra::ShapeMatchModelDijkstra(Eigen::MatrixXd& iVX, Eigen::Ma
     couplingConstraints = iCouplingConstraints;
     otherSelfIntersections = iOtherSelfIntersections;
     lineIntegral = iLineIntegral;
+    numContours = 0;
 }
 
 

@@ -177,7 +177,7 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
     }
 
     const long offset3 = offset + 1;
-    // coupling of layers if the resemble same Y vertex and coupling is enabled
+    // coupling of layers if they resemble same Y vertex and coupling is enabled
     if (coupling) {
         const long numEdgesOnLayer = (2 * nEX + nVX);
         int nthCoupling = 0;
@@ -199,8 +199,8 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
                         continue;
                     }
                     int nthcontour = 0;
-                    for (int i = 0; i < layer; i++) {
-                        if (EY(i, 0) == -1) {
+                    for (int j = 0; j < layer; j++) {
+                        if (EY(j, 0) == -1) {
                             nthcontour++;
                         }
                     }

@@ -46,6 +46,7 @@ private:
     bool couplingConstraints;
     bool lineIntegral;
     bool otherSelfIntersections;
+    int numContours;
     
 public:
     ShapeMatchModelDijkstra(Eigen::MatrixXd& iVX, Eigen::MatrixXi& iFX, Eigen::MatrixXd& iVY, Eigen::MatrixXi& iEY, Eigen::MatrixXd& iFeatDiffMatrix, bool iCouplingConstraints, bool iOtherSelfIntersections, bool iLineIntegral);
