@@ -35,12 +35,15 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
     VYcount = Eigen::ArrayXi(numVY, 1);
     VYcount.setZero();
     if (coupling) {
+        int nthcontour = 0;
         for (int i = 0; i < EY.rows(); i++) {
             if (EY(i, 0) == -1) {
+                nthcontour++;
                 continue;
             }
-            VYcount(EY(i, 0), 0) = VYcount(EY(i, 0), 0) + 1;
-            couplingLayers[EY(i, 0)].push_back(i);
+            const int vertexyIdx = EY(i, 0);
+            VYcount(vertexyIdx, 0) = VYcount(vertexyIdx, 0) + 1;
+            couplingLayers[vertexyIdx].push_back(i - nthcontour); // we might need to substract -1 here, ✅
         }
         for (int i = 0; i < numVY; i++) {
             if (VYcount(i, 0) > 1) {
@@ -181,7 +184,7 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
     if (coupling) {
         const long numEdgesOnLayer = (2 * nEX + nVX);
         int nthCoupling = 0;
-        for (long i = 0; i < EY.maxCoeff()+1; i++) {
+        for (long i = 0; i < numVY; i++) {
             if (VYcount(i, 0) > 1) {
                 int baseCoupleLayer = -1;
                 try {
@@ -193,22 +196,22 @@ std::tuple<Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, Eigen::MatrixXi, E
                     std::cout << exc.what() << std::endl;
                 }
 
-                for (auto& layer : couplingLayers.at(i)) {
+                for (auto& layer : couplingLayers.at(i)) { // layer is currently index INCLUDING -1 rows
                     if (baseCoupleLayer == -1) {
                         baseCoupleLayer = layer;
                         continue;
                     }
                     int nthcontour = 0;
-                    for (int j = 0; j < layer; j++) {
+                    /*for (int j = 0; j < layer; j++) {
                         if (EY(j, 0) == -1) {
                             nthcontour++;
                         }
-                    }
+                    }*/
 
 
                     // any outgoing edge of vertex in X in layer i must be matched by any outgoing edge in baseCoupleLayer
-                    const long edgeOffsetBase = baseCoupleLayer * numEdgesOnLayer;
-                    const long edgeOffsetCouple = (layer - nthcontour) * numEdgesOnLayer;
+                    const long edgeOffsetBase = baseCoupleLayer * numEdgesOnLayer; // we also need to fix this here!!!!
+                    const long edgeOffsetCouple = layer * numEdgesOnLayer;
                     if (edgeOffsetCouple > productspace.rows() - numEdgesOnLayer) {
                         std::cout << " nthcontour" << nthcontour << std::endl;
                     }
