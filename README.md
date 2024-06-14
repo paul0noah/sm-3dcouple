@@ -1,6 +1,6 @@
-# Shape Match Model Dijkstra 3D Coupling
+# Dijkstra Shape Match Model with Coupling
 
-Description: tbd
+This repository creates the integer linear program introduced in the CVPR2024 best paper award candidate SpiderMatch. For more information take a look at [our project page](https://paulroetzer.github.io/publications/2024-06-19-spidermatch.html) as well as the [main repository](https://github.com/paul0noah/spider-match) to which this repository serves as a helper.
 
 ## ⚙️ Installation
 
@@ -53,15 +53,18 @@ m.optimize()
 ```
 
 🚀 Cpp
-```c++
-tbd
-```
+Please create a github issue if you want to have instructions on how to use the vanilla cpp implemention.
 
 ## Attribution 🎓
 When using this code for your own projects please cite the followig:
 
 ```bibtex
-tbd
+@inproceedings{roetzer2024spidermatch,
+    author     = {Paul Roetzer and Florian Bernard},
+    title     = { SpiderMatch: 3D Shape Matching with Global Optimality and Geometric Consistency },
+    booktitle = {IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+    year     = 2024
+}
 ```
 
 ## License 🚀
