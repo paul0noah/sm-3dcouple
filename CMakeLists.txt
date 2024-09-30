@@ -9,9 +9,11 @@ set(CMAKE_BUILD_TYPE Release)
 ## load external content
 list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 # pybind11
-include(pybind)
+# include(pybind)
 # Libigl
 include(libigl)
+# add add
+add_subdirectory(external/BDD)
 
 
 # switch between python bindings and executable
@@ -38,7 +40,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/external/robin-map/include)
 
 # Add your project files
-add_subdirectory(external/BDD)
 target_include_directories(${PROJECT_NAME} PUBLIC external/BDD/include/)
 add_subdirectory(helper)
 add_subdirectory(shapeMatchModel)
