@@ -23,9 +23,7 @@ from smm_dijkstra import *
 from gurobipy import GRB
 
 
-coupling = True
-lineIntegral = True
-smm = ShapeMatchModelDijkstra(vy, ey, vx, ex, absfeatdiffmat, coupling, lineIntegral)
+smm = ShapeMatchModelDijkstra(vy, ey, vx, ex, absfeatdiffmat, True, True)
 E = smm.getCostVector()
 RHS = smm.getRHS()
 I, J, V = smm.getAVectors()

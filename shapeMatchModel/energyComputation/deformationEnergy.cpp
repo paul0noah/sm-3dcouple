@@ -42,7 +42,7 @@ void DeformationEnergy::computeEnergy() {
             continue;
         }
 
-        if (true) {
+        if (lineIntegral) {
             lineIntegralVal = 0;
             for (int j = 0; j < 3; j++) {
                 lineIntegralVal += std::pow(VY(idx2d0, j) - VY(idx2d1, j), 2);
